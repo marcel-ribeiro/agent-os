@@ -28,6 +28,17 @@ ELSE:
 - Extract repeated UI markup to reusable components
 - Create utility functions for common operations
 
+### Avoid hardcoding
+- Avoid hardcoding parameter values as much as possible
+- Do not hardcode secrets ever (like api keys, tokens, passwords, etc...)
+
+### Follow a layered architecture
+Follow a **layered architecture** pattern with distinct Model, Service, and Repository components.
+- **Model Layer:** Define data structures for business entities. These should be data-only objects without business logic. Files in this layer should be suffixed with "_model"
+- **Repository Layer:** Handle all data persistence and retrieval. This layer abstracts the database and exposes an interface for data operations. Files in this layer should be suffixed with "_repository"
+- **Service Layer:** Implement the core business logic. This layer orchestrates interactions between the Model and Repository layers to complete a business transaction. Files in this layer should be suffixed with "_service"
+
+
 ### File Structure
 - Keep files focused on a single responsibility
 - Group related functionality together
