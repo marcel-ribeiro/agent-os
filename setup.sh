@@ -5,6 +5,34 @@
 
 set -e  # Exit on error
 
+# Base URL for raw GitHub content
+BASE_URL="https://raw.githubusercontent.com/buildermethods/agent-os/main"
+
+# Function to copy file from local or remote source
+# Usage: copy_file <destination> <source_path> <mode>
+# mode: "local" or "remote"
+copy_file() {
+    local destination="$1"
+    local source_path="$2"
+    local mode="$3"
+    
+    echo "    [DEBUG] copy_file: destination='$destination' source_path='$source_path' mode='$mode'"
+    
+    if [ "$mode" = "remote" ]; then
+        echo "    [DEBUG] Executing: curl -s -o \"$destination\" \"$BASE_URL/$source_path\""
+        curl -s -o "$destination" "$BASE_URL/$source_path"
+    elif [ "$mode" = "local" ]; then
+        echo "    [DEBUG] Executing: cp \"./$source_path\" \"$destination\""
+        cp "./$source_path" "$destination"
+    else
+        echo "Error: Invalid mode '$mode'. Use 'local' or 'remote'"
+        exit 1
+    fi
+}
+
+# Set default mode (change this to "local" or "remote" as needed)
+COPY_MODE="local"
+
 # Initialize flags
 OVERWRITE_INSTRUCTIONS=false
 OVERWRITE_STANDARDS=false
@@ -18,6 +46,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --overwrite-standards)
             OVERWRITE_STANDARDS=true
+            shift
+            ;;
+        --use-remote)
+            COPY_MODE="remote"
             shift
             ;;
         -h|--help)
@@ -42,9 +74,6 @@ echo "🚀 Agent OS Setup Script"
 echo "========================"
 echo ""
 
-# Base URL for raw GitHub content
-BASE_URL="https://raw.githubusercontent.com/buildermethods/agent-os/main"
-
 # Create directories
 echo "📁 Creating directories..."
 mkdir -p "$HOME/.agent-os/standards"
@@ -55,13 +84,13 @@ mkdir -p "$HOME/.agent-os/instructions/meta"
 
 # Download standards files
 echo ""
-echo "📥 Downloading standards files to ~/.agent-os/standards/"
+echo "📋 Installing standards files to ~/.agent-os/standards/"
 
 # tech-stack.md
 if [ -f "$HOME/.agent-os/standards/tech-stack.md" ] && [ "$OVERWRITE_STANDARDS" = false ]; then
     echo "  ⚠️  ~/.agent-os/standards/tech-stack.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/standards/tech-stack.md" "${BASE_URL}/standards/tech-stack.md"
+    copy_file "$HOME/.agent-os/standards/tech-stack.md" "standards/tech-stack.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/standards/tech-stack.md" ] && [ "$OVERWRITE_STANDARDS" = true ]; then
         echo "  ✓ ~/.agent-os/standards/tech-stack.md (overwritten)"
     else
@@ -73,7 +102,7 @@ fi
 if [ -f "$HOME/.agent-os/standards/code-style.md" ] && [ "$OVERWRITE_STANDARDS" = false ]; then
     echo "  ⚠️  ~/.agent-os/standards/code-style.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/standards/code-style.md" "${BASE_URL}/standards/code-style.md"
+    copy_file "$HOME/.agent-os/standards/code-style.md" "standards/code-style.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/standards/code-style.md" ] && [ "$OVERWRITE_STANDARDS" = true ]; then
         echo "  ✓ ~/.agent-os/standards/code-style.md (overwritten)"
     else
@@ -85,7 +114,7 @@ fi
 if [ -f "$HOME/.agent-os/standards/best-practices.md" ] && [ "$OVERWRITE_STANDARDS" = false ]; then
     echo "  ⚠️  ~/.agent-os/standards/best-practices.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/standards/best-practices.md" "${BASE_URL}/standards/best-practices.md"
+    copy_file "$HOME/.agent-os/standards/best-practices.md" "standards/best-practices.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/standards/best-practices.md" ] && [ "$OVERWRITE_STANDARDS" = true ]; then
         echo "  ✓ ~/.agent-os/standards/best-practices.md (overwritten)"
     else
@@ -95,13 +124,13 @@ fi
 
 # Download code-style subdirectory files
 echo ""
-echo "📥 Downloading code style files to ~/.agent-os/standards/code-style/"
+echo "📋 Installing code style files to ~/.agent-os/standards/code-style/"
 
 # css-style.md
 if [ -f "$HOME/.agent-os/standards/code-style/css-style.md" ] && [ "$OVERWRITE_STANDARDS" = false ]; then
     echo "  ⚠️  ~/.agent-os/standards/code-style/css-style.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/standards/code-style/css-style.md" "${BASE_URL}/standards/code-style/css-style.md"
+    copy_file "$HOME/.agent-os/standards/code-style/css-style.md" "standards/code-style/css-style.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/standards/code-style/css-style.md" ] && [ "$OVERWRITE_STANDARDS" = true ]; then
         echo "  ✓ ~/.agent-os/standards/code-style/css-style.md (overwritten)"
     else
@@ -113,7 +142,7 @@ fi
 if [ -f "$HOME/.agent-os/standards/code-style/html-style.md" ] && [ "$OVERWRITE_STANDARDS" = false ]; then
     echo "  ⚠️  ~/.agent-os/standards/code-style/html-style.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/standards/code-style/html-style.md" "${BASE_URL}/standards/code-style/html-style.md"
+    copy_file "$HOME/.agent-os/standards/code-style/html-style.md" "standards/code-style/html-style.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/standards/code-style/html-style.md" ] && [ "$OVERWRITE_STANDARDS" = true ]; then
         echo "  ✓ ~/.agent-os/standards/code-style/html-style.md (overwritten)"
     else
@@ -125,7 +154,7 @@ fi
 if [ -f "$HOME/.agent-os/standards/code-style/javascript-style.md" ] && [ "$OVERWRITE_STANDARDS" = false ]; then
     echo "  ⚠️  ~/.agent-os/standards/code-style/javascript-style.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/standards/code-style/javascript-style.md" "${BASE_URL}/standards/code-style/javascript-style.md"
+    copy_file "$HOME/.agent-os/standards/code-style/javascript-style.md" "standards/code-style/javascript-style.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/standards/code-style/javascript-style.md" ] && [ "$OVERWRITE_STANDARDS" = true ]; then
         echo "  ✓ ~/.agent-os/standards/code-style/javascript-style.md (overwritten)"
     else
@@ -135,7 +164,7 @@ fi
 
 # Download instruction files
 echo ""
-echo "📥 Downloading instruction files to ~/.agent-os/instructions/"
+echo "📋 Installing instruction files to ~/.agent-os/instructions/"
 
 # Core instruction files
 echo "  📂 Core instructions:"
@@ -144,7 +173,7 @@ echo "  📂 Core instructions:"
 if [ -f "$HOME/.agent-os/instructions/core/plan-product.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = false ]; then
     echo "    ⚠️  ~/.agent-os/instructions/core/plan-product.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/instructions/core/plan-product.md" "${BASE_URL}/instructions/core/plan-product.md"
+    copy_file "$HOME/.agent-os/instructions/core/plan-product.md" "instructions/core/plan-product.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/instructions/core/plan-product.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = true ]; then
         echo "    ✓ ~/.agent-os/instructions/core/plan-product.md (overwritten)"
     else
@@ -156,7 +185,7 @@ fi
 if [ -f "$HOME/.agent-os/instructions/core/create-spec.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = false ]; then
   echo "    ⚠️  ~/.agent-os/instructions/core/create-spec.md already exists - skipping"
 else
-  curl -s -o "$HOME/.agent-os/instructions/core/create-spec.md" "${BASE_URL}/instructions/core/create-spec.md"
+  copy_file "$HOME/.agent-os/instructions/core/create-spec.md" "instructions/core/create-spec.md" "$COPY_MODE"
   if [ -f "$HOME/.agent-os/instructions/core/create-spec.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = true ]; then
     echo "    ✓ ~/.agent-os/instructions/core/create-spec.md (overwritten)"
   else
@@ -168,7 +197,7 @@ fi
 if [ -f "$HOME/.agent-os/instructions/core/execute-tasks.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = false ]; then
     echo "    ⚠️  ~/.agent-os/instructions/core/execute-tasks.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/instructions/core/execute-tasks.md" "${BASE_URL}/instructions/core/execute-tasks.md"
+    copy_file "$HOME/.agent-os/instructions/core/execute-tasks.md" "instructions/core/execute-tasks.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/instructions/core/execute-tasks.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = true ]; then
         echo "    ✓ ~/.agent-os/instructions/core/execute-tasks.md (overwritten)"
     else
@@ -180,7 +209,7 @@ fi
 if [ -f "$HOME/.agent-os/instructions/core/execute-task.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = false ]; then
     echo "    ⚠️  ~/.agent-os/instructions/core/execute-task.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/instructions/core/execute-task.md" "${BASE_URL}/instructions/core/execute-task.md"
+    copy_file "$HOME/.agent-os/instructions/core/execute-task.md" "instructions/core/execute-task.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/instructions/core/execute-task.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = true ]; then
         echo "    ✓ ~/.agent-os/instructions/core/execute-task.md (overwritten)"
     else
@@ -192,7 +221,7 @@ fi
 if [ -f "$HOME/.agent-os/instructions/core/analyze-product.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = false ]; then
     echo "    ⚠️  ~/.agent-os/instructions/core/analyze-product.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/instructions/core/analyze-product.md" "${BASE_URL}/instructions/core/analyze-product.md"
+    copy_file "$HOME/.agent-os/instructions/core/analyze-product.md" "instructions/core/analyze-product.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/instructions/core/analyze-product.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = true ]; then
         echo "    ✓ ~/.agent-os/instructions/core/analyze-product.md (overwritten)"
     else
@@ -208,7 +237,7 @@ echo "  📂 Meta instructions:"
 if [ -f "$HOME/.agent-os/instructions/meta/pre-flight.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = false ]; then
     echo "    ⚠️  ~/.agent-os/instructions/meta/pre-flight.md already exists - skipping"
 else
-    curl -s -o "$HOME/.agent-os/instructions/meta/pre-flight.md" "${BASE_URL}/instructions/meta/pre-flight.md"
+    copy_file "$HOME/.agent-os/instructions/meta/pre-flight.md" "instructions/meta/pre-flight.md" "$COPY_MODE"
     if [ -f "$HOME/.agent-os/instructions/meta/pre-flight.md" ] && [ "$OVERWRITE_INSTRUCTIONS" = true ]; then
         echo "    ✓ ~/.agent-os/instructions/meta/pre-flight.md (overwritten)"
     else

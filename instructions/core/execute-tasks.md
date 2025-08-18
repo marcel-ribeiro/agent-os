@@ -10,7 +10,18 @@ encoding: UTF-8
 
 ## Overview
 
-Initiate execution of one or more tasks for a given spec.
+Initiate execution of one or more tasks for a given spec with integrated Jira project tracking.
+
+<agent_detection>
+  <check_once>
+    AT START OF PROCESS:
+    SET has_git_workflow = (Claude Code AND git-workflow agent exists)
+    SET has_test_runner = (Claude Code AND test-runner agent exists)
+    SET has_context_fetcher = (Claude Code AND context-fetcher agent exists)
+    SET has_jira_workflow = (Claude Code AND jira-workflow agent exists AND .mcp.json contains Jira server)
+    USE these flags throughout execution
+  </check_once>
+</agent_detection>
 
 <pre_flight_check>
   EXECUTE: @~/.agent-os/instructions/meta/pre-flight.md
@@ -120,9 +131,44 @@ Use the git-workflow subagent to manage git branches to ensure proper isolation 
 
 </step>
 
-<step number="5" name="task_execution_loop">
+<step number="5" subagent="jira-workflow" name="jira_epic_initialization">
 
-### Step 5: Task Execution Loop
+### Step 5: Jira Epic Initialization (Conditional)
+
+Use the jira-workflow subagent to create or verify Jira Epic and Tasks exist for this spec if Jira integration is configured.
+
+<instructions>
+  IF has_jira_workflow:
+    USE: @agent:jira-workflow
+    REQUEST: "Initialize Epic and Tasks for spec:
+              - Spec: [SPEC_FOLDER_PATH]
+              - Epic from: spec.md overview and deliverables
+              - Tasks from: tasks.md major tasks
+              - Action: Create if not exists, verify if exists"
+    WAIT: For Jira initialization completion
+  ELSE:
+    SKIP: Jira initialization
+    NOTE: "Proceeding with local task tracking only"
+</instructions>
+
+<conditional_execution>
+  <jira_available>
+    - Create Epic from spec.md
+    - Create Tasks from tasks.md
+    - Set initial statuses to "To Do"
+    - Link Epic to Tasks
+  </jira_available>
+  <jira_unavailable>
+    - Continue with local tasks.md tracking
+    - Log that Jira integration is disabled
+  </jira_unavailable>
+</conditional_execution>
+
+</step>
+
+<step number="6" name="task_execution_loop">
+
+### Step 6: Task Execution Loop
 
 Execute all assigned parent tasks and their subtasks using @~/.agent-os/instructions/core/execute-task.md instructions, continuing until all tasks are complete.
 
@@ -135,6 +181,7 @@ Execute all assigned parent tasks and their subtasks using @~/.agent-os/instruct
       - all associated subtasks
     WAIT for task completion
     UPDATE tasks.md status
+    UPDATE Jira task status (if Jira integration enabled)
   END FOR
 </execution_flow>
 
@@ -170,9 +217,9 @@ Execute all assigned parent tasks and their subtasks using @~/.agent-os/instruct
 
 </step>
 
-<step number="6" subagent="test-runner" name="test_suite_verification">
+<step number="7" subagent="test-runner" name="test_suite_verification">
 
-### Step 6: Run All Tests
+### Step 7: Run All Tests
 
 Use the test-runner subagent to run the entire test suite to ensure no regressions and fix any failures until all tests pass.
 
@@ -199,9 +246,9 @@ Use the test-runner subagent to run the entire test suite to ensure no regressio
 
 </step>
 
-<step number="7" subagent="git-workflow" name="git_workflow">
+<step number="8" subagent="git-workflow" name="git_workflow">
 
-### Step 7: Git Workflow
+### Step 8: Git Workflow
 
 Use the git-workflow subagent to create git commit, push to GitHub, and create pull request for the implemented features.
 
@@ -233,9 +280,38 @@ Use the git-workflow subagent to create git commit, push to GitHub, and create p
 
 </step>
 
-<step number="8" name="roadmap_progress_check">
+<step number="9" subagent="jira-workflow" name="jira_epic_completion">
 
-### Step 8: Roadmap Progress Check (Conditional)
+### Step 9: Jira Epic Completion Check (Conditional)
+
+Use the jira-workflow subagent to check if all Epic tasks are complete and update Epic status accordingly.
+
+<instructions>
+  IF has_jira_workflow:
+    USE: @agent:jira-workflow
+    REQUEST: "Complete Epic workflow for spec:
+              - Epic: [SPEC_NAME]
+              - Action: Check all tasks, mark Epic as Done if complete
+              - Validate: All acceptance criteria met"
+    WAIT: For Epic completion check
+  ELSE:
+    SKIP: Jira Epic completion check
+</instructions>
+
+<completion_criteria>
+  <epic_complete_when>
+    - All Jira Tasks in Epic marked "Done"
+    - All local tasks.md tasks marked [x]
+    - All tests passing
+    - PR created and merged (if applicable)
+  </epic_complete_when>
+</completion_criteria>
+
+</step>
+
+<step number="10" name="roadmap_progress_check">
+
+### Step 10: Roadmap Progress Check (Conditional)
 
 Check @.agent-os/product/roadmap.md (if not in context) and update roadmap progress only if the executed tasks may have completed a roadmap item and the spec completes that item.
 
@@ -244,7 +320,7 @@ Check @.agent-os/product/roadmap.md (if not in context) and update roadmap progr
     EVALUATE: Did executed tasks potentially complete a roadmap item?
     IF NO:
       SKIP this entire step
-      PROCEED to step 9
+      PROCEED to step 11
     IF YES:
       CONTINUE with roadmap check
   </preliminary_check>
@@ -278,9 +354,9 @@ Check @.agent-os/product/roadmap.md (if not in context) and update roadmap progr
 
 </step>
 
-<step number="9" name="completion_notification">
+<step number="11" name="completion_notification">
 
-### Step 9: Task Completion Notification
+### Step 11: Task Completion Notification
 
 Play a system sound to alert the user that tasks are complete.
 
@@ -295,9 +371,9 @@ Play a system sound to alert the user that tasks are complete.
 
 </step>
 
-<step number="10" name="completion_summary">
+<step number="12" name="completion_summary">
 
-### Step 10: Completion Summary
+### Step 12: Completion Summary
 
 Create a structured summary message with emojis showing what was done, any issues, testing instructions, and PR link.
 
@@ -321,6 +397,12 @@ Create a structured summary message with emojis showing what was done, any issue
   ## 📦 Pull Request
 
   View PR: [GITHUB_PR_URL]
+
+  ## 🎫 Jira Tracking
+
+  [ONLY_IF_JIRA_ENABLED]
+  - Epic: [JIRA_EPIC_URL]
+  - Tasks: [JIRA_TASK_URLS]
 </summary_template>
 
 <summary_sections>

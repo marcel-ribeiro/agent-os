@@ -10,7 +10,17 @@ encoding: UTF-8
 
 ## Overview
 
-Generate detailed feature specifications aligned with product roadmap and mission.
+Generate detailed feature specifications aligned with product roadmap and mission with integrated Jira Epic and Task creation.
+
+<agent_detection>
+  <check_once>
+    AT START OF PROCESS:
+    SET has_file_creator = (Claude Code AND file-creator agent exists)
+    SET has_context_fetcher = (Claude Code AND context-fetcher agent exists)
+    SET has_jira_workflow = (Claude Code AND jira-workflow agent exists AND .mcp.json contains Jira server)
+    USE these flags throughout execution
+  </check_once>
+</agent_detection>
 
 <pre_flight_check>
   EXECUTE: @~/.agent-os/instructions/meta/pre-flight.md
@@ -470,9 +480,60 @@ Use the file-creator subagent to await user approval from step 11 and then creat
 
 </step>
 
-<step number="13" name="decision_documentation">
+<step number="13" subagent="jira-workflow" name="jira_epic_task_creation">
 
-### Step 13: Decision Documentation (Conditional)
+### Step 13: Jira Epic and Task Creation (Conditional)
+
+Use the jira-workflow subagent to create Jira Epic and Tasks from the completed spec if Jira integration is configured.
+
+<instructions>
+  IF has_jira_workflow:
+    USE: @agent:jira-workflow
+    REQUEST: "Create Epic and Tasks for spec:
+              - Spec: [SPEC_FOLDER_PATH]
+              - Epic from: spec.md overview and deliverables
+              - Tasks from: tasks.md major tasks
+              - Action: Create new Epic and Tasks with proper linking"
+    WAIT: For Jira creation completion
+    SAVE: Epic and Task URLs for summary
+  ELSE:
+    SKIP: Jira Epic and Task creation
+    NOTE: "Jira integration not available, using local tasks.md only"
+</instructions>
+
+<jira_mapping>
+  <epic_creation>
+    - Title: Extracted from spec folder name (without date prefix)
+    - Description: From spec.md overview section
+    - Acceptance Criteria: From spec.md expected deliverables
+    - Labels: "agent-os", spec name, feature type
+  </epic_creation>
+  <task_creation>
+    - Each major task from tasks.md becomes a Jira Task
+    - Task belongs to the Epic created above
+    - Subtasks become task description details
+    - Initial status: "To Do"
+  </task_creation>
+</jira_mapping>
+
+<conditional_execution>
+  <jira_available>
+    - Create Epic with spec details
+    - Create Tasks linked to Epic
+    - Set all initial statuses to "To Do"
+    - Generate Jira URLs for reference
+  </jira_available>
+  <jira_unavailable>
+    - Continue with local tasks.md only
+    - Log that Jira integration is disabled
+  </jira_unavailable>
+</conditional_execution>
+
+</step>
+
+<step number="14" name="decision_documentation">
+
+### Step 14: Decision Documentation (Conditional)
 
 Evaluate strategic impact without loading decisions.md and update it only if there's significant deviation from mission/roadmap and user approves.
 
@@ -549,9 +610,9 @@ Evaluate strategic impact without loading decisions.md and update it only if the
 
 </step>
 
-<step number="14" name="execution_readiness">
+<step number="15" name="execution_readiness">
 
-### Step 14: Execution Readiness Check
+### Step 15: Execution Readiness Check
 
 Evaluate readiness to begin implementation after completing all previous steps, presenting the first task summary and requesting user confirmation to proceed.
 

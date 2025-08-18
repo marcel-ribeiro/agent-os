@@ -5,6 +5,48 @@
 
 set -e  # Exit on error
 
+# Function to copy file from local or remote source
+# Usage: copy_file <destination> <source_path> <mode>
+# mode: "local" or "remote"
+copy_file() {
+    local destination="$1"
+    local source_path="$2"
+    local mode="$3"
+    
+    echo "    [DEBUG] copy_file: destination='$destination' source_path='$source_path' mode='$mode'"
+    
+    if [ "$mode" = "remote" ]; then
+        echo "    [DEBUG] Executing: curl -s -o \"$destination\" \"$BASE_URL/$source_path\""
+        curl -s -o "$destination" "$BASE_URL/$source_path"
+    elif [ "$mode" = "local" ]; then
+        echo "    [DEBUG] Executing: cp \"./$source_path\" \"$destination\""
+        cp "./$source_path" "$destination"
+    else
+        echo "Error: Invalid mode '$mode'. Use 'local' or 'remote'"
+        exit 1
+    fi
+}
+
+# Set default mode
+COPY_MODE="local"
+
+# Parse command line arguments
+OVERRIDE_FLAG=false
+for arg in "$@"; do
+    case $arg in
+        --override)
+            OVERRIDE_FLAG=true
+            shift
+            ;;
+        --use-remote)
+            COPY_MODE="remote"
+            shift
+            ;;
+        *)
+            ;;
+    esac
+done
+
 echo "🚀 Agent OS Claude Code Setup"
 echo "============================="
 echo ""
@@ -34,30 +76,36 @@ mkdir -p "$HOME/.claude/agents"
 
 # Download command files for Claude Code
 echo ""
-echo "📥 Downloading Claude Code command files to ~/.claude/commands/"
+echo "📥 Installing Claude Code command files to ~/.claude/commands/ (MODE: $COPY_MODE)"
 
 # Commands
 for cmd in plan-product create-spec execute-tasks analyze-product; do
-    if [ -f "$HOME/.claude/commands/${cmd}.md" ]; then
+    if [ -f "$HOME/.claude/commands/${cmd}.md" ] && [ "$OVERRIDE_FLAG" = false ]; then
         echo "  ⚠️  ~/.claude/commands/${cmd}.md already exists - skipping"
     else
-        curl -s -o "$HOME/.claude/commands/${cmd}.md" "${BASE_URL}/commands/${cmd}.md"
+        if [ -f "$HOME/.claude/commands/${cmd}.md" ] && [ "$OVERRIDE_FLAG" = true ]; then
+            echo "  🔄 Overriding ~/.claude/commands/${cmd}.md"
+        fi
+        copy_file "$HOME/.claude/commands/${cmd}.md" "commands/${cmd}.md" "$COPY_MODE"
         echo "  ✓ ~/.claude/commands/${cmd}.md"
     fi
 done
 
 # Download Claude Code agents
 echo ""
-echo "📥 Downloading Claude Code subagents to ~/.claude/agents/"
+echo "📥 Installing Claude Code subagents to ~/.claude/agents/ (MODE: $COPY_MODE)"
 
 # List of agent files to download
-agents=("test-runner" "context-fetcher" "git-workflow" "file-creator" "date-checker")
+agents=("test-runner" "context-fetcher" "git-workflow" "file-creator" "date-checker" "jira-workflow")
 
 for agent in "${agents[@]}"; do
-    if [ -f "$HOME/.claude/agents/${agent}.md" ]; then
+    if [ -f "$HOME/.claude/agents/${agent}.md" ] && [ "$OVERRIDE_FLAG" = false ]; then
         echo "  ⚠️  ~/.claude/agents/${agent}.md already exists - skipping"
     else
-        curl -s -o "$HOME/.claude/agents/${agent}.md" "${BASE_URL}/claude-code/agents/${agent}.md"
+        if [ -f "$HOME/.claude/agents/${agent}.md" ] && [ "$OVERRIDE_FLAG" = true ]; then
+            echo "  🔄 Overriding ~/.claude/agents/${agent}.md"
+        fi
+        copy_file "$HOME/.claude/agents/${agent}.md" "claude-code/agents/${agent}.md" "$COPY_MODE"
         echo "  ✓ ~/.claude/agents/${agent}.md"
     fi
 done

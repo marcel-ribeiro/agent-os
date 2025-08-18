@@ -10,7 +10,17 @@ encoding: UTF-8
 
 ## Overview
 
-Execute a specific task along with its sub-tasks systematically following a TDD development workflow.
+Execute a specific task along with its sub-tasks systematically following a TDD development workflow with integrated Jira status tracking.
+
+<agent_detection>
+  <check_once>
+    AT START OF PROCESS:
+    SET has_context_fetcher = (Claude Code AND context-fetcher agent exists)
+    SET has_test_runner = (Claude Code AND test-runner agent exists)
+    SET has_jira_workflow = (Claude Code AND jira-workflow agent exists AND .mcp.json contains Jira server)
+    USE these flags throughout execution
+  </check_once>
+</agent_detection>
 
 <pre_flight_check>
   EXECUTE: @~/.agent-os/instructions/meta/pre-flight.md
@@ -126,9 +136,36 @@ Use the context-fetcher subagent to retrieve relevant code style rules from @~/.
 
 </step>
 
-<step number="5" name="task_execution">
+<step number="5" subagent="jira-workflow" name="jira_task_start">
 
-### Step 5: Task and Sub-task Execution
+### Step 5: Jira Task Status Update - Start (Conditional)
+
+Use the jira-workflow subagent to mark the Jira task as "In Progress" when starting development.
+
+<instructions>
+  IF has_jira_workflow:
+    USE: @agent:jira-workflow
+    REQUEST: "Update Task status:
+              - Task: [PARENT_TASK_DESCRIPTION]
+              - Status: In Progress
+              - Notes: Development started"
+    WAIT: For status update completion
+  ELSE:
+    SKIP: Jira task status update
+    NOTE: "Proceeding with local task tracking only"
+</instructions>
+
+<status_transition>
+  <from>To Do</from>
+  <to>In Progress</to>
+  <trigger>Task development begins</trigger>
+</status_transition>
+
+</step>
+
+<step number="6" name="task_execution">
+
+### Step 6: Task and Sub-task Execution
 
 Execute the parent task and all sub-tasks in order using test-driven development (TDD) approach.
 
@@ -188,9 +225,9 @@ Execute the parent task and all sub-tasks in order using test-driven development
 
 </step>
 
-<step number="6" subagent="test-runner" name="task_test_verification">
+<step number="7" subagent="test-runner" name="task_test_verification">
 
-### Step 6: Task-Specific Test Verification
+### Step 7: Task-Specific Test Verification
 
 Use the test-runner subagent to run and verify only the tests specific to this parent task (not the full test suite) to ensure the feature is working correctly.
 
@@ -226,11 +263,11 @@ Use the test-runner subagent to run and verify only the tests specific to this p
 
 </step>
 
-<step number="7" name="task_status_updates">
+<step number="8" subagent="jira-workflow" name="task_status_updates">
 
-### Step 7: Task Status Updates
+### Step 8: Task Status Updates
 
-Update the tasks.md file immediately after completing each task to track progress.
+Update both the local tasks.md file and Jira task status immediately after completing the task.
 
 <update_format>
   <completed>- [x] Task description</completed>
@@ -252,6 +289,21 @@ Update the tasks.md file immediately after completing each task to track progres
   MARK: [x] for completed items immediately
   DOCUMENT: Blocking issues with ⚠️ emoji
   LIMIT: 3 attempts before marking as blocked
+  
+  IF has_jira_workflow AND task completed successfully:
+    USE: @agent:jira-workflow
+    REQUEST: "Update Task status:
+              - Task: [PARENT_TASK_DESCRIPTION]
+              - Status: Done
+              - Notes: Task completed, all subtasks finished"
+    WAIT: For Jira status update completion
+  ELSE IF has_jira_workflow AND task blocked:
+    USE: @agent:jira-workflow
+    REQUEST: "Update Task status:
+              - Task: [PARENT_TASK_DESCRIPTION]
+              - Status: Blocked
+              - Notes: [BLOCKING_ISSUE_DESCRIPTION]"
+    WAIT: For Jira status update completion
 </instructions>
 
 </step>
