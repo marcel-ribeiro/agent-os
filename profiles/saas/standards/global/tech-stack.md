@@ -4,6 +4,8 @@ This tech stack is optimized for building scalable, modern SaaS applications wit
 
 > **Note on Versions:** This document intentionally omits specific version numbers. Always use the **Context7 MCP** (`mcp__context7__resolve_library_id` and `mcp__context7__query_docs`) to determine the latest stable versions and best practices for each dependency. See {{workflows/optimize-dependencies}} for the complete process.
 
+> **Version Pinning:** ALL dependencies MUST use exact version pinning (no ranges). See {{standards/global/versioning}} for requirements.
+
 ### Framework & Runtime
 
 **Primary (Recommended)**

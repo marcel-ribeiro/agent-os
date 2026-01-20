@@ -14,6 +14,46 @@ Now that we've implemented all tasks in tasks.md, we must run final verification
 
 {{workflows/implementation/verification/run-all-tests}}
 
+### Step 3a: Verify multi-tenancy (SaaS Critical)
+
+If changes involve data access, API endpoints, or database queries:
+
+{{workflows/verify-multi-tenancy}}
+
+**Critical for SaaS**: Data leaks between tenants are catastrophic. Always verify tenant isolation.
+
+**Skip if:** Changes only affect UI, static content, or documentation.
+
+### Step 3b: Verify database migrations (If migrations added)
+
+If database migrations were created:
+
+{{workflows/verify-database-migrations}}
+
+**Check for migration files:**
+```bash
+git diff main...HEAD --name-status | grep migrations
+```
+
+### Step 3c: Verify monitoring & observability
+
+Ensure errors and performance issues will be detected:
+
+{{workflows/verify-monitoring}}
+
+**Always verify** error tracking and logging are functional.
+
+### Step 3d: Verify performance (If critical paths changed)
+
+If changes affect API endpoints, database queries, or frontend:
+
+{{workflows/verify-performance}}
+
+**Performance targets:**
+- API: <200ms (p95)
+- Frontend: <2s page load
+- Database: Queries use indexes
+
 ### Step 4: Optimize dependencies using Context7 MCP
 
 Before finalizing, ensure all dependencies are using optimal versions:
