@@ -1,11 +1,19 @@
 # Optimize Dependencies
 
-Verify all dependencies use exact stable versions via Context7 MCP.
+## CRITICAL REQUIREMENTS
+
+**Before proceeding, you MUST:**
+
+1. ✅ **ALWAYS use exact versions** (no `^`, `~`, `*`, `>=`, `latest`)
+2. ✅ **ALWAYS query Context7 MCP** to get the latest stable version
+3. ✅ **NEVER add or update dependencies** without Context7 verification
+
+**Zero tolerance for version ranges. See:** {{standards/global/versioning}}
 
 ## When to Run
 
-- New dependency added
-- Dependency updated
+- **MANDATORY:** Before adding any new dependency
+- **MANDATORY:** Before updating any existing dependency
 - During implementation verification
 - During code review (if dependency files changed)
 
@@ -35,14 +43,23 @@ const docs = await mcp__context7__query_docs({
 });
 ```
 
-### 3. Verify Each Dependency
+### 3. Verify Each Dependency (MANDATORY CHECKS)
 
-- [ ] **Exact version** (no `^`, `~`, `>=`)
-- [ ] **Latest stable** (not beta/alpha)
-- [ ] **No vulnerabilities**
-- [ ] **Compatible** with other deps
-- [ ] **Actively maintained**
-- [ ] **Documented** via Context7
+**STOP and FAIL if ANY of these checks fail:**
+
+- [ ] ❌ **FAIL:** Version uses range operators (`^`, `~`, `>=`, `*`, `latest`)
+- [ ] ✅ **PASS:** Exact version only (e.g., `"5.0.1"` not `"^5.0.1"`)
+- [ ] ✅ **Latest stable** via Context7 (not beta/alpha)
+- [ ] ✅ **No vulnerabilities** (check Context7 + security advisories)
+- [ ] ✅ **Compatible** with other deps (verify via Context7)
+- [ ] ✅ **Actively maintained** (recent updates, good docs)
+- [ ] ✅ **Documented** via Context7 (quality docs available)
+
+**If you find ANY version range operator, immediately:**
+1. STOP the current process
+2. Query Context7 MCP for the exact stable version
+3. Update to exact version format
+4. Re-verify all checks pass
 
 ### 4. Update Dependency Files
 
