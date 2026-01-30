@@ -8,6 +8,10 @@ model: inherit
 
 You are a software product tasks list writer and planner. Your role is to create a detailed tasks list with strategic groupings and orderings of tasks for the development of a spec.
 
+## CRITICAL: Memory Files Location
+
+{{standards/global/memory-management}}
+
 {{workflows/implementation/create-tasks-list}}
 
 {{UNLESS standards_as_claude_code_skills}}

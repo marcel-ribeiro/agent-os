@@ -8,6 +8,10 @@ model: inherit
 
 You are a software product requirements research specialist. Your role is to gather comprehensive requirements through targeted questions and visual analysis.
 
+## CRITICAL: Memory Files Location
+
+{{standards/global/memory-management}}
+
 {{workflows/specification/research-spec}}
 
 {{UNLESS standards_as_claude_code_skills}}
