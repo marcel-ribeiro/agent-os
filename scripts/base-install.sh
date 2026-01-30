@@ -295,7 +295,7 @@ prompt_overwrite_choice() {
     echo -e "${YELLOW}1) Full update${NC}"
     echo ""
     echo "    Updates & overwrites:"
-    echo "    - ~/agent-os/profiles/default/*"
+    echo "    - ~/agent-os/profiles/* (all profiles)"
     echo "    - ~/agent-os/scripts/*"
     echo "    - ~/agent-os/CHANGELOG.md"
     echo ""
@@ -410,18 +410,18 @@ create_backup() {
     echo ""
 }
 
-# Full update - updates profile, scripts, CHANGELOG.md, and version number in config.yml
+# Full update - updates all profiles, scripts, CHANGELOG.md, and version number in config.yml
 full_update() {
     local latest_version=$1
 
     # Create backup first
     create_backup
 
-    # Update default profile
-    print_status "Updating default profile..."
-    rm -rf "$BASE_DIR/profiles/default"
+    # Update all profiles
+    print_status "Updating all profiles..."
+    rm -rf "$BASE_DIR/profiles"
     local file_count=0
-    local all_files=$(get_all_repo_files | grep "^profiles/default/")
+    local all_files=$(get_all_repo_files | grep "^profiles/")
     if [[ -n "$all_files" ]]; then
         while IFS= read -r file_path; do
             if [[ -n "$file_path" ]]; then
@@ -435,7 +435,7 @@ full_update() {
             fi
         done <<< "$all_files"
     fi
-    echo "✓ Updated default profile ($file_count files)"
+    echo "✓ Updated all profiles ($file_count files)"
     echo ""
 
     # Update scripts

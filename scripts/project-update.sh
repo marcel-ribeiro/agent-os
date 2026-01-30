@@ -27,7 +27,7 @@ USE_CLAUDE_CODE_SUBAGENTS=""
 AGENT_OS_COMMANDS=""
 STANDARDS_AS_CLAUDE_CODE_SKILLS=""
 RE_INSTALL="false"
-OVERWRITE_ALL="false"
+OVERWRITE_ALL="true"
 OVERWRITE_AGENTS="false"
 OVERWRITE_COMMANDS="false"
 OVERWRITE_STANDARDS="false"
@@ -53,7 +53,7 @@ Options:
     --agent-os-commands [BOOL]               Install agent-os commands for other tools (true/false)
     --standards-as-claude-code-skills [BOOL] Use Claude Code Skills for standards (true/false)
     --re-install                             Delete and reinstall Agent OS
-    --overwrite-all                          Overwrite all existing files
+    --overwrite-all [BOOL]                   Overwrite all existing files (default: true)
     --overwrite-agents                       Overwrite existing agent files
     --overwrite-commands                     Overwrite existing command files
     --overwrite-standards                    Overwrite existing standards files
@@ -65,8 +65,9 @@ Options:
 Note: Flags accept both hyphens and underscores (e.g., --use-claude-code-subagents or --use_claude_code_subagents)
 
 Examples:
-    $0
-    $0 --overwrite-agents
+    $0                                       # Updates and overwrites all files (default)
+    $0 --overwrite-all false                 # Preserves existing files (only adds new ones)
+    $0 --overwrite-agents                    # Only overwrites agent files
     $0 --claude-code-commands true --use-claude-code-subagents true
     $0 --dry-run --verbose
 
@@ -109,8 +110,8 @@ parse_arguments() {
                 shift
                 ;;
             --overwrite-all)
-                OVERWRITE_ALL="true"
-                shift
+                read OVERWRITE_ALL shift_count <<< "$(parse_bool_flag "$OVERWRITE_ALL" "$2")"
+                shift $shift_count
                 ;;
             --overwrite-agents)
                 OVERWRITE_AGENTS="true"
