@@ -200,6 +200,36 @@ install_standards() {
     fi
 }
 
+# Install workflows files
+install_workflows() {
+    if [[ "$DRY_RUN" != "true" ]]; then
+        print_status "Installing workflows"
+    fi
+
+    local workflows_count=0
+
+    while read file; do
+        if [[ "$file" == workflows/* ]]; then
+            local source=$(get_profile_file "$EFFECTIVE_PROFILE" "$file" "$BASE_DIR")
+            local dest="$PROJECT_DIR/agent-os/$file"
+
+            if [[ -f "$source" ]]; then
+                local installed_file=$(copy_file "$source" "$dest")
+                if [[ -n "$installed_file" ]]; then
+                    INSTALLED_FILES+=("$installed_file")
+                    ((workflows_count++)) || true
+                fi
+            fi
+        fi
+    done < <(get_profile_files "$EFFECTIVE_PROFILE" "$BASE_DIR" "workflows")
+
+    if [[ "$DRY_RUN" != "true" ]]; then
+        if [[ $workflows_count -gt 0 ]]; then
+            echo "✓ Installed $workflows_count workflows in agent-os/workflows"
+        fi
+    fi
+}
+
 # Install and compile single-agent mode commands
 # Install Claude Code commands with delegation (multi-agent files)
 install_claude_code_commands_with_delegation() {
@@ -409,6 +439,7 @@ perform_installation() {
         # Collect files without output
         create_agent_os_folder
         install_standards
+        install_workflows
 
         # Install Claude Code files if enabled
         if [[ "$EFFECTIVE_CLAUDE_CODE_COMMANDS" == "true" ]]; then
@@ -440,6 +471,9 @@ perform_installation() {
         echo ""
 
         install_standards
+        echo ""
+
+        install_workflows
         echo ""
 
         # Install Claude Code files if enabled
