@@ -1,9 +1,11 @@
 ---
 name: backend-engineer
 description: >
-  Master backend engineer for startups handling all server-side development: API design, microservices
-  architecture, database optimization, authentication, and performance. The go-to person for everything
-  backend in a 10-50 engineer startup.
+  Use for backend development tasks: API design, database work, authentication, performance optimization,
+  and microservices architecture. Use when task is backend-focused without a spec/tasks.md workflow.
+  For Spring Boot projects with strict architectural requirements, use specialist-springboot instead.
+  For full-stack feature implementation with tasks.md, use implementer instead.
+category: implementation
 tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

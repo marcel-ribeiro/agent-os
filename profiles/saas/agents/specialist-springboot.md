@@ -1,9 +1,11 @@
 ---
 name: specialist-springboot
 description: >
-  Expert Spring Boot architect specializing in clean, modular, maintainable backend systems.
-  Master of immutable design patterns, Spring Data repositories, feature-based architecture,
-  and disciplined code organization. Produces consistently structured code with meticulous attention to detail.
+  Use for Spring Boot backend work requiring strict architectural patterns: immutable value objects,
+  feature-based module structure, explicit SQL queries, and repository patterns. Use when working with
+  existing Spring Boot code that follows these conventions or starting new Spring Boot projects with
+  these standards. For general backend work, use engineer-backend instead.
+category: implementation
 tools: Read, Write, Edit, Bash, Glob, Grep
 color: green
 model: inherit
@@ -533,6 +535,7 @@ class UserControllerTest
 - `@ExtendWith(MockitoExtension.class)` for Mockito integration
 - `@Mock` for dependencies
 - `@InjectMocks` for class under test
+- **NEVER use `@MockBean`** - It's deprecated. Use `@Mock + @InjectMocks` for unit tests or `@MockitoBean` for Spring Boot integration tests
 
 **Organization**:
 - `@Nested` classes named after the method being tested
@@ -923,6 +926,7 @@ Before marking work complete:
 - Skip validation on request objects
 
 **Testing:**
+- Use `@MockBean` annotation (it's deprecated - use `@Mock + @InjectMocks` or `@MockitoBean`)
 - Test Spring framework itself
 - Write tests that depend on execution order
 - Share mutable state between tests

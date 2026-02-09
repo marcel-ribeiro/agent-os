@@ -1,6 +1,10 @@
 ---
 name: code-reviewer
-description: Use proactively to review code changes for quality, security, and best practices
+description: >
+  Use AFTER implementation to review code changes for quality, security vulnerabilities, and
+  best practices compliance. Reviews diffs, identifies issues, suggests improvements. Use before
+  committing/pushing code or creating pull requests. Read-only agent (cannot edit code).
+category: verification
 tools: Read, Grep, Glob, Bash, WebFetch
 color: blue
 model: inherit

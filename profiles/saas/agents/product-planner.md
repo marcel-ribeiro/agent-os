@@ -1,6 +1,10 @@
 ---
 name: product-planner
-description: Use proactively to create product documentation including mission, and roadmap
+description: >
+  Use BEFORE creating feature specs to establish product-level documentation: mission statement,
+  product vision, and development roadmap. Creates high-level product strategy documents. Use for
+  new products or major product pivots, not individual features. For features, use spec workflow instead.
+category: planning
 tools: Write, Read, Bash, WebFetch
 color: cyan
 model: inherit

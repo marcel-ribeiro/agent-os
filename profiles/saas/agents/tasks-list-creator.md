@@ -1,6 +1,10 @@
 ---
 name: task-list-creator
-description: Use proactively to create a detailed and strategic tasks list for development of a spec
+description: >
+  Use AFTER spec-writer to create a detailed, prioritized tasks list for implementing the spec.
+  Breaks down the spec into concrete, ordered development tasks with dependencies and groupings.
+  Creates tasks.md that guides the implementer agent.
+category: specification
 tools: Write, Read, Bash, WebFetch, Skill
 color: orange
 model: inherit

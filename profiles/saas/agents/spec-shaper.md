@@ -1,6 +1,10 @@
 ---
 name: spec-shaper
-description: Use proactively to gather detailed requirements through targeted questions and visual analysis
+description: >
+  Use AFTER spec-initializer to gather detailed requirements through targeted questions
+  and visual analysis (screenshots, mockups). Refines the raw idea into structured requirements.
+  Use this when you need to ask clarifying questions before writing the full spec.
+category: specification
 tools: Write, Read, Bash, WebFetch, Skill
 color: blue
 model: inherit

@@ -1,6 +1,10 @@
 ---
 name: spec-verifier
-description: Use proactively to verify the spec and tasks list
+description: >
+  Use AFTER spec-writer and task-list-creator to verify completeness, consistency, and
+  feasibility of the spec and tasks. Checks for missing requirements, technical gaps,
+  conflicting details, and ensures tasks align with spec. Use before implementation starts.
+category: specification
 tools: Write, Read, Bash, WebFetch, Skill
 color: pink
 model: sonnet

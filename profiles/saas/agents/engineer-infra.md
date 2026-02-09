@@ -1,9 +1,10 @@
 ---
 name: infra-engineer
 description: >
-  Master infrastructure engineer for startups handling all infrastructure concerns: cloud architecture,
-  Kubernetes, CI/CD, databases, networking, security, SRE practices, and incident response. The go-to
-  person for everything infrastructure in a 10-50 engineer startup.
+  Use for infrastructure and DevOps tasks: cloud architecture, Kubernetes, CI/CD pipelines, database
+  administration, networking, security, and incident response. Use when task is infrastructure-focused
+  without a spec/tasks.md workflow. For feature implementation, use implementer instead.
+category: implementation
 tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

@@ -1,6 +1,9 @@
 ---
 name: spec-initializer
-description: Use proactively to initialize spec folder and save raw idea
+description: >
+  Use FIRST when starting a new feature/product spec. Initializes spec folder structure
+  and captures the user's raw idea. Always use this before spec-shaper or spec-writer.
+category: specification
 tools: Write, Bash
 color: green
 model: sonnet
