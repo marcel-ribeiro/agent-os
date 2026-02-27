@@ -27,10 +27,11 @@ USE_CLAUDE_CODE_SUBAGENTS=""
 AGENT_OS_COMMANDS=""
 STANDARDS_AS_CLAUDE_CODE_SKILLS=""
 RE_INSTALL="false"
-OVERWRITE_ALL="false"
+OVERWRITE_ALL="true"
 OVERWRITE_AGENTS="false"
 OVERWRITE_COMMANDS="false"
 OVERWRITE_STANDARDS="false"
+OVERWRITE_WORKFLOWS="false"
 SKIPPED_FILES=()
 UPDATED_FILES=()
 NEW_FILES=()
@@ -52,10 +53,11 @@ Options:
     --agent-os-commands [BOOL]               Install agent-os commands for other tools (true/false)
     --standards-as-claude-code-skills [BOOL] Use Claude Code Skills for standards (true/false)
     --re-install                             Delete and reinstall Agent OS
-    --overwrite-all                          Overwrite all existing files
+    --overwrite-all [BOOL]                   Overwrite all existing files (default: true)
     --overwrite-agents                       Overwrite existing agent files
     --overwrite-commands                     Overwrite existing command files
     --overwrite-standards                    Overwrite existing standards files
+    --overwrite-workflows                    Overwrite existing workflows files
     --dry-run                                Show what would be done without doing it
     --verbose                                Show detailed output
     -h, --help                               Show this help message
@@ -63,8 +65,9 @@ Options:
 Note: Flags accept both hyphens and underscores (e.g., --use-claude-code-subagents or --use_claude_code_subagents)
 
 Examples:
-    $0
-    $0 --overwrite-agents
+    $0                                       # Updates and overwrites all files (default)
+    $0 --overwrite-all false                 # Preserves existing files (only adds new ones)
+    $0 --overwrite-agents                    # Only overwrites agent files
     $0 --claude-code-commands true --use-claude-code-subagents true
     $0 --dry-run --verbose
 
@@ -107,8 +110,8 @@ parse_arguments() {
                 shift
                 ;;
             --overwrite-all)
-                OVERWRITE_ALL="true"
-                shift
+                read OVERWRITE_ALL shift_count <<< "$(parse_bool_flag "$OVERWRITE_ALL" "$2")"
+                shift $shift_count
                 ;;
             --overwrite-agents)
                 OVERWRITE_AGENTS="true"
@@ -120,6 +123,10 @@ parse_arguments() {
                 ;;
             --overwrite-standards)
                 OVERWRITE_STANDARDS="true"
+                shift
+                ;;
+            --overwrite-workflows)
+                OVERWRITE_WORKFLOWS="true"
                 shift
                 ;;
             --dry-run)
@@ -270,6 +277,55 @@ update_standards() {
         fi
         if [[ $standards_skipped -gt 0 ]]; then
             echo -e "${YELLOW}$standards_skipped files in agent-os/standards were not updated and overwritten. To update and overwrite these, re-run with --overwrite-standards flag.${NC}"
+        fi
+    fi
+}
+
+# Update workflows files
+update_workflows() {
+    print_status "Updating workflows"
+
+    local workflows_updated=0
+    local workflows_skipped=0
+    local workflows_new=0
+
+    while read file; do
+        if [[ "$file" == workflows/* ]]; then
+            local source=$(get_profile_file "$PROJECT_PROFILE" "$file" "$BASE_DIR")
+            local dest="$PROJECT_DIR/agent-os/$file"
+
+            if [[ -f "$source" ]]; then
+                if should_skip_file "$dest" "$OVERWRITE_ALL" "$OVERWRITE_WORKFLOWS" "workflow"; then
+                    SKIPPED_FILES+=("$dest")
+                    ((workflows_skipped++)) || true
+                    print_verbose "Skipped: $dest"
+                else
+                    if [[ -f "$dest" ]]; then
+                        UPDATED_FILES+=("$dest")
+                        ((workflows_updated++)) || true
+                        print_verbose "Updated: $dest"
+                    else
+                        NEW_FILES+=("$dest")
+                        ((workflows_new++)) || true
+                        print_verbose "New file: $dest"
+                    fi
+                    if [[ "$DRY_RUN" != "true" ]]; then
+                        copy_file "$source" "$dest" > /dev/null
+                    fi
+                fi
+            fi
+        fi
+    done < <(get_profile_files "$PROJECT_PROFILE" "$BASE_DIR" "workflows")
+
+    if [[ "$DRY_RUN" != "true" ]]; then
+        if [[ $workflows_new -gt 0 ]]; then
+            echo "✓ Added $workflows_new workflows in agent-os/workflows"
+        fi
+        if [[ $workflows_updated -gt 0 ]]; then
+            echo "✓ Updated $workflows_updated workflows in agent-os/workflows"
+        fi
+        if [[ $workflows_skipped -gt 0 ]]; then
+            echo -e "${YELLOW}$workflows_skipped files in agent-os/workflows were not updated and overwritten. To update and overwrite these, re-run with --overwrite-workflows flag.${NC}"
         fi
     fi
 }
@@ -589,6 +645,9 @@ perform_update() {
     update_standards
     echo ""
 
+    update_workflows
+    echo ""
+
     # Update Claude Code files if enabled
     if [[ "$PROJECT_CLAUDE_CODE_COMMANDS" == "true" ]]; then
         if [[ "$PROJECT_USE_CLAUDE_CODE_SUBAGENTS" == "true" ]]; then
@@ -751,6 +810,7 @@ prompt_update_confirmation() {
     echo ""
     echo "  - agent-os/config.yml"
     echo "  - agent-os/standards/"
+    echo "  - agent-os/workflows/"
     if [[ "$EFFECTIVE_AGENT_OS_COMMANDS" == "true" ]] || [[ -d "$PROJECT_DIR/agent-os/commands" ]]; then
         echo "  - agent-os/commands/"
     fi
@@ -789,6 +849,14 @@ perform_update_cleanup() {
         print_status "Removing agent-os/standards/"
         if [[ "$DRY_RUN" != "true" ]]; then
             rm -rf "$PROJECT_DIR/agent-os/standards"
+        fi
+    fi
+
+    # Delete agent-os/workflows/ (will be reinstalled)
+    if [[ -d "$PROJECT_DIR/agent-os/workflows" ]]; then
+        print_status "Removing agent-os/workflows/"
+        if [[ "$DRY_RUN" != "true" ]]; then
+            rm -rf "$PROJECT_DIR/agent-os/workflows"
         fi
     fi
 

@@ -1122,7 +1122,7 @@ validate_base_installation() {
         print_error "Agent OS base installation not found at ~/agent-os/"
         echo ""
         print_status "Please run the base installation first:"
-        echo "  curl -sSL https://raw.githubusercontent.com/buildermethods/agent-os/main/scripts/base-install.sh | bash"
+        echo "  /path/to/agent-os-source/scripts/base-install.sh"
         echo ""
         exit 1
     fi
