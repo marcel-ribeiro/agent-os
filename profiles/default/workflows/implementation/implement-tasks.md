@@ -14,6 +14,42 @@ Implement all tasks assigned to you and ONLY those task(s) that have been assign
 - **User Standards & Preferences** which are defined below.
 
 ## Self-verify and test your work by:
+
+### CRITICAL: Verify Each Step Before Moving On
+
+**After EVERY change you make, you MUST verify it before proceeding:**
+
+#### For Frontend Changes:
+```bash
+# After EVERY change:
+# 1. Verify that a test covers the change made
+npm test
+# 2. Check exit code
+echo $?
+# 3. If 0, it passed. If not 0, it failed.
+# 4. Look at actual test output, not assumptions
+# 5. Ensure documents (markdown files) are updated
+```
+
+#### For Backend Changes:
+```bash
+# After EVERY change:
+# 1. Verify that a test covers the change made
+./mvnw clean package
+# 2. Check exit code
+echo $?
+# 3. If 0, it passed. If not 0, it failed.
+# 4. Look at actual test output, not assumptions
+# 5. Ensure documents (markdown files) are updated
+```
+
+**DO NOT proceed to the next change until:**
+- ✅ Tests pass (exit code is 0)
+- ✅ You've reviewed the actual test output
+- ✅ Relevant documentation has been updated
+- ✅ The change is verified to work as intended
+
+### Additional Verification Steps:
 - Running ONLY the tests you've written (if any) and ensuring those tests pass.
 - IF your task involves user-facing UI, and IF you have access to browser testing tools, open a browser and use the feature you've implemented as if you are a user to ensure a user can use the feature in the intended way.
   - Take screenshots of the views and UI elements you've tested and store those in `agent-os/specs/[this-spec]/verification/screenshots/`.  Do not store screenshots anywhere else in the codebase other than this location.
