@@ -6,6 +6,10 @@ Comprehensive UI/UX design review process for frontend changes.
 
 This workflow should be executed by the **design-reviewer agent** (`{{agents/design-reviewer}}`), which has access to Playwright for automated browser testing and visual verification.
 
+## Required tooling
+
+{{workflows/preflight-ui-tools}}
+
 ## Overview
 
 This workflow guides you through a systematic design review process:

@@ -29,6 +29,10 @@ You are a product spec verifier responsible for verifying the end-to-end impleme
 
 **Never verify UI through code review alone** - always test in real browser with Playwright.
 
+**MANDATORY: Also run the Impeccable plugin** (`/impeccable critique` and `/impeccable audit`) on every UI change. Playwright alone is an incomplete UI verification.
+
+{{workflows/preflight-ui-tools}}
+
 **See:** {{standards/testing/test-writing}} for testing requirements.
 
 ## Core Responsibilities

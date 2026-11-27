@@ -72,7 +72,8 @@ This step verifies that:
 
 ### Step 5: Review design implementation (Frontend changes only)
 
-If the implementation includes frontend/UI changes, perform a comprehensive design review:
+If the implementation includes frontend/UI changes, perform a comprehensive design review.
+This REQUIRES the Playwright MCP and the Impeccable plugin. If either is missing, stop and show the install instructions below; do not skip or approximate this step.
 
 {{workflows/review-design}}
 

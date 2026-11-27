@@ -51,5 +51,6 @@ Assuming all tasks are marked complete, then delegate to the **implementation-ve
 Provide to the subagent the following:
 - The path to this spec: `agent-os/specs/[this-spec]`
 Instruct the subagent to do the following:
+  0. If the spec has any UI changes, run the UI tooling preflight first (Playwright MCP + Impeccable plugin). If either is missing, report it as BLOCKED with the install instructions instead of continuing.
   1. Run all of its final verifications according to its built-in workflow
   2. Produce the final verification report in `agent-os/specs/[this-spec]/verifications/final-verification.md`.
