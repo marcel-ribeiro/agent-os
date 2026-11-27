@@ -51,6 +51,9 @@ echo $?
 
 ### Additional Verification Steps:
 - Running ONLY the tests you've written (if any) and ensuring those tests pass.
-- IF your task involves user-facing UI, and IF you have access to browser testing tools, open a browser and use the feature you've implemented as if you are a user to ensure a user can use the feature in the intended way.
+- IF your task involves user-facing UI, you MUST verify it with the Playwright MCP and the Impeccable plugin (both required; no skipping when they are unavailable):
+  {{workflows/preflight-ui-tools}}
+  - Use Playwright to open a browser and use the feature you've implemented as if you are a user to ensure a user can use the feature in the intended way.
+  - Run `/impeccable critique` and `/impeccable audit` on the UI you changed and fix P0/P1 findings.
   - Take screenshots of the views and UI elements you've tested and store those in `agent-os/specs/[this-spec]/verification/screenshots/`.  Do not store screenshots anywhere else in the codebase other than this location.
   - Analyze the screenshot(s) you've taken to check them against your current requirements.

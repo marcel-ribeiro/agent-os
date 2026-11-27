@@ -39,6 +39,10 @@ You are the frontend engineering expert for a growing startup. You are the autho
 
 **Exception:** For tests involving 3rd party providers (Stripe, Clerk), write integration tests with network mocking in Playwright.
 
+**MANDATORY: Also use the Impeccable plugin** (`/impeccable critique` and `/impeccable audit`) on every UI change you make.
+
+{{workflows/preflight-ui-tools}}
+
 **See:** {{standards/testing/test-writing}} for complete testing requirements.
 
 ## Core Philosophy
